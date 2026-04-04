@@ -1,0 +1,2023 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>UCCL Asset Inspection Module</title>
+  <style>
+    /* LARGER TEXT - Optimized for Geotab */
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:#f5f7fa;min-height:100vh;color:#333;padding:12px;font-size:18px}
+    .container{max-width:100%;margin:0 auto}
+    .header,.card{background:#fff;border-radius:8px;padding:18px;margin-bottom:18px;box-shadow:0 2px 8px rgba(0,0,0,.08)}
+    .header{text-align:center}
+    .header h1{color:#2d3748;font-size:1.8em;font-weight:700;margin-bottom:8px}
+    .header p{font-size:1.1em;color:#666}
+    .card-title{color:#2d3748;font-size:1.5em;font-weight:700;margin-bottom:18px;padding-bottom:10px;border-bottom:2px solid #e2e8f0}
+    .form-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:12px}
+    .form-control{width:100%;padding:11px 14px;border:2px solid #e2e8f0;border-radius:6px;font-size:17px;transition:all .2s ease}
+    .form-control:focus{outline:none;border-color:#667eea;box-shadow:0 0 0 3px rgba(102,126,234,.1)}
+    .btn{padding:11px 22px;border:none;border-radius:6px;font-size:17px;font-weight:600;cursor:pointer;transition:all .2s ease;margin:4px}
+    .btn:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,.15)}
+    .btn-primary{background:linear-gradient(135deg,#667eea,#764ba2);color:#fff}
+    .btn-success{background:linear-gradient(135deg,#48bb78,#38a169);color:#fff}
+    .btn-info{background:linear-gradient(135deg,#4299e1,#3182ce);color:#fff}
+    .btn-warning{background:linear-gradient(135deg,#ed8936,#dd6b20);color:#fff}
+    .btn-danger{background:linear-gradient(135deg,#f56565,#e53e3e);color:#fff}
+    .btn[disabled]{opacity:.5;cursor:not-allowed}
+    .alert{padding:14px;border-radius:6px;margin:14px 0;font-weight:500;font-size:17px}
+    .alert-success{background:#c6f6d5;color:#22543d;border-left:4px solid #38a169}
+    .alert-error{background:#fed7d7;color:#742a2a;border-left:4px solid #e53e3e}
+    .alert-warning{background:#fefcbf;color:#744210;border-left:4px solid #d69e2e}
+    .alert-info{background:#ebf8ff;color:#2b6cb0;border-left:4px solid #4299e1}
+    /* LARGER TABLE TEXT */
+    .dvir-table{width:100%;border-collapse:collapse;margin-top:18px;background:#fff;border-radius:8px;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,.08)}
+    .dvir-table th{background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;padding:13px 10px;text-align:left;font-weight:600;font-size:18px}
+    .dvir-table td{padding:11px 10px;border-bottom:1px solid #e2e8f0;font-size:17px;vertical-align:top;line-height:1.5}
+    .dvir-table tr:hover{background:#f7fafc}
+    .dvir-table tr:nth-child(even){background:#f8f9fa}
+    /* LARGER STATUS BADGES */
+    .status-safe{background:#c6f6d5;color:#22543d;padding:8px 14px;border-radius:6px;font-weight:600;font-size:16px}
+    .status-unsafe{background:#fed7d7;color:#742a2a;padding:8px 14px;border-radius:6px;font-weight:600;font-size:16px}
+    .status-unknown{background:#e2e8f0;color:#4a5568;padding:8px 14px;border-radius:6px;font-weight:600;font-size:16px}
+    .status-overdue{background:#fefcbf;color:#744210;padding:8px 14px;border-radius:6px;font-weight:600;font-size:16px}
+    .muted{color:#718096;font-size:16px}
+    .progress-bar{width:100%;background:#e2e8f0;border-radius:4px;overflow:hidden;margin:12px 0}
+    .progress-fill{height:28px;background:linear-gradient(90deg,#667eea,#764ba2);transition:width 0.3s ease;display:flex;align-items:center;justify-content:center;color:white;font-size:16px;font-weight:600}
+    .real-address{background:#d4edda;color:#155724;padding:10px 14px;border-radius:6px;font-weight:500;border-left:4px solid #28a745;font-size:17px}
+    .coord-only{color:#666;font-style:italic;font-size:16px}
+    .zone-pill{display:inline-block;background:#e2e8f0;border-radius:999px;padding:5px 11px;margin:2px;font-size:15px;color:#495057}
+    .config-section{background:#f8f9fa;padding:16px;border-radius:8px;margin:16px 0}
+    .config-section h4{margin-bottom:12px;color:#2d3748;font-size:1.25em}
+    .checkbox-group{margin:9px 0}
+    .checkbox-group label{display:flex;align-items:center;gap:8px;cursor:pointer;font-size:17px}
+    .checkbox-group input[type="checkbox"]{width:20px;height:20px}
+    .email-options{margin-top:14px;padding:14px;background:#e2e8f0;border-radius:8px}
+    .ignition-info{font-size:15px;color:#666;margin-top:4px}
+    .zone-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin:16px 0}
+    .zone-stat-card{background:white;padding:14px;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,.1);text-align:center}
+    .zone-stat-value{font-size:2em;font-weight:700;color:#667eea;margin:5px 0}
+    .zone-stat-label{font-size:1em;color:#666}
+    .zone-section{margin:18px 0;border:2px solid #e2e8f0;border-radius:10px;overflow:hidden}
+    .zone-header{background:linear-gradient(135deg,#667eea,#764ba2);color:white;padding:13px;font-size:1.25em;font-weight:600}
+    .zone-inspections{padding:0}
+    .sms-log{max-height:280px;overflow-y:auto;background:#f8f9fa;padding:14px;border-radius:8px;margin-top:14px}
+    .log-entry{padding:10px 14px;margin:4px 0;border-radius:4px;font-size:16px;background:#fff}
+    .log-sms{background:#e7f5ff;border-left:3px solid #4299e1}
+    .log-error{background:#fed7d7;border-left:3px solid #e53e3e}
+    .log-success{background:#c6f6d5;border-left:3px solid #38a169}
+    .log-info{background:#f7fafc;border-left:3px solid #718096}
+    .sms-section{background:linear-gradient(135deg,#fff5f5,#fed7e2);border-left:4px solid #f56565;margin:16px 0}
+    .badge{display:inline-block;padding:6px 12px;border-radius:12px;font-size:15px;font-weight:600;margin:2px}
+    .badge-active{background:#48bb78;color:white}
+    .badge-inactive{background:#cbd5e0;color:#4a5568}
+
+    /* SMS ACTIVE BANNER */
+    #smsActiveBanner{
+      display:none;
+      position:sticky;
+      top:0;
+      z-index:9999;
+      background:linear-gradient(135deg,#e53e3e,#c53030);
+      color:white;
+      text-align:center;
+      padding:14px 20px;
+      font-size:1.1em;
+      font-weight:700;
+      border-radius:0 0 8px 8px;
+      box-shadow:0 4px 16px rgba(229,62,62,.5);
+      animation:sms-pulse 2s ease-in-out infinite;
+      letter-spacing:0.03em;
+    }
+    @keyframes sms-pulse{
+      0%,100%{box-shadow:0 4px 16px rgba(229,62,62,.5);background:linear-gradient(135deg,#e53e3e,#c53030);}
+      50%{box-shadow:0 4px 32px rgba(229,62,62,.9);background:linear-gradient(135deg,#fc5c5c,#e53e3e);}
+    }
+    .poll-select{padding:6px 10px;border:2px solid rgba(255,255,255,.4);border-radius:6px;background:rgba(0,0,0,.25);color:white;font-size:15px;font-weight:600;margin:0 8px;cursor:pointer;}
+    .poll-select option{background:#c53030;color:white;}
+    .poll-stop-btn{background:rgba(0,0,0,.3);border:2px solid rgba(255,255,255,.5);color:white;padding:6px 14px;border-radius:6px;font-size:14px;font-weight:700;cursor:pointer;margin-left:8px;transition:background .2s;}
+    .poll-stop-btn:hover{background:rgba(0,0,0,.5);}
+    #pollCountdown{font-size:13px;opacity:.85;margin-left:10px;}
+  </style>
+</head>
+<body>
+  <!-- SMS ACTIVE BANNER -->
+  <div id="smsActiveBanner">
+    🚨 SMS ALERTS ACTIVE &nbsp;|&nbsp; <span id="pollIntervalLabel">10 min</span> interval
+    &nbsp;&nbsp;
+    <button class="poll-stop-btn" onclick="stopPolling()">⏹ Stop Alerts</button>
+    <span id="pollCountdown"></span>
+  </div>
+
+  <div class="container">
+    <div class="header">
+      <h1>UCCL Asset Inspection Dashboard</h1>
+      <p>United Civil Construction Ltd</p>
+    </div>
+
+    <div id="dvirSection" class="card">
+      <h3 class="card-title">📋 Asset Inspection Reports</h3>
+
+      <!-- Geofence Filter -->
+      <div style="margin:16px 0;">
+        <label for="zoneFilter" style="display:block;margin-bottom:6px;font-weight:600;color:#2d3748;">📍 Filter by Geofence:</label>
+        <select id="zoneFilter" class="form-control" style="max-width:320px;">
+          <option value="">All Zones</option>
+          <option value="no-zone">No Zone Assigned</option>
+        </select>
+      </div>
+
+      <!-- Hidden inputs retained for JS compatibility -->
+      <input id="alertWindow" type="hidden" value="5" />
+      <input id="assetType" type="hidden" value="all" />
+      <input type="hidden" id="enableOverdueAlerts" />
+      <input type="hidden" id="groupByZone" />
+      <input type="hidden" id="hideNotNecessary" />
+      <input type="hidden" id="hideUnknownStatus" />
+      <input type="hidden" id="hideNonDriverInspections" />
+      <span id="testResult" style="display:none;"></span>
+
+      <!-- SMS ALERT CONFIGURATION -->
+      <input type="hidden" id="heavyPrimaryEnabled" value="true" />
+      <input type="hidden" id="heavySecondaryEnabled" value="true" />
+      <input type="hidden" id="lightPrimaryEnabled" value="true" />
+
+      <div class="config-section sms-section">
+        <h4>&#128241; SMS &amp; Email Alert Configuration (eTXT / Spark NZ)</h4>
+
+        <div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap;margin-bottom:14px;">
+          <div class="checkbox-group" style="margin:0;">
+            <label><input type="checkbox" id="enableSmsAlerts" />
+              Enable Alerts</label>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <label for="pollIntervalSelect" style="font-size:16px;font-weight:600;color:#2d3748;">⏱ Check every:</label>
+            <select id="pollIntervalSelect" class="form-control" style="width:auto;padding:8px 12px;font-size:16px;">
+              <option value="5">5 minutes</option>
+              <option value="10" selected>10 minutes</option>
+              <option value="15">15 minutes</option>
+              <option value="30">30 minutes</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="alertRulesPanel" style="background:white;padding:14px;border-radius:8px;border:2px solid #e2e8f0;margin-bottom:14px;">
+          <div style="font-weight:700;margin-bottom:12px;color:#2d3748;">&#128203; Alert Rules</div>
+          <table style="width:100%;border-collapse:collapse;font-size:15px;">
+            <thead><tr style="background:#f7fafc;">
+              <th style="padding:8px 10px;border:1px solid #e2e8f0;text-align:left;">Vehicle Type</th>
+              <th style="padding:8px 10px;border:1px solid #e2e8f0;text-align:left;">Alert</th>
+              <th style="padding:8px 10px;border:1px solid #e2e8f0;text-align:left;">Trigger</th>
+              <th style="padding:8px 10px;border:1px solid #e2e8f0;text-align:left;">Sent To</th>
+              <th style="padding:8px 10px;border:1px solid #e2e8f0;text-align:left;">Method</th>
+             </tr></thead>
+            <tbody>
+              <tr style="background:#ebf8ff;">
+                <td style="padding:8px 10px;border:1px solid #e2e8f0;font-weight:600;">&#128666; Mobile Machines &amp; Trucks</td>
+                <td style="padding:8px 10px;border:1px solid #e2e8f0;">Primary</td>
+                <td style="padding:8px 10px;border:1px solid #e2e8f0;">In use for
+                  <select id="heavyPrimaryThreshold" style="margin:0 4px;padding:3px 6px;border:1px solid #cbd5e0;border-radius:4px;font-size:14px;">
+                    <option value="1">1 minute</option>
+                    <option value="2">2 minutes</option>
+                    <option value="5" selected>5 minutes</option>
+                    <option value="10">10 minutes</option>
+                    <option value="15">15 minutes</option>
+                    <option value="30">30 minutes</option>
+                  </select>, no pre-start received</td>
+                <td style="padding:8px 10px;border:1px solid #e2e8f0;">Operator</td>
+                <td style="padding:8px 10px;border:1px solid #e2e8f0;">&#128172; Text</td>
+              </tr>
+              <tr style="background:#fff5f5;">
+                <td style="padding:8px 10px;border:1px solid #e2e8f0;font-weight:600;">&#128666; Mobile Machines &amp; Trucks</td>
+                <td style="padding:8px 10px;border:1px solid #e2e8f0;">Secondary</td>
+                <td style="padding:8px 10px;border:1px solid #e2e8f0;">In use for
+                  <select id="heavySecondaryThreshold" style="margin:0 4px;padding:3px 6px;border:1px solid #cbd5e0;border-radius:4px;font-size:14px;">
+                    <option value="1">1 minute</option>
+                    <option value="5">5 minutes</option>
+                    <option value="60">1 hour</option>
+                    <option value="120" selected>2 hours</option>
+                    <option value="180">3 hours</option>
+                    <option value="240">4 hours</option>
+                  </select>, still no pre-start received</td>
+                <td style="padding:8px 10px;border:1px solid #e2e8f0;">Zone Supervisor + Northland Ops Manager</td>
+                <td style="padding:8px 10px;border:1px solid #e2e8f0;">&#128172; Text &amp; &#128231; Email</td>
+              </tr>
+              <tr style="background:#f0fff4;">
+                <td style="padding:8px 10px;border:1px solid #e2e8f0;font-weight:600;">&#128665; Light Vehicles</td>
+                <td style="padding:8px 10px;border:1px solid #e2e8f0;">Primary</td>
+                <td style="padding:8px 10px;border:1px solid #e2e8f0;">No pre-start in
+                  <select id="lightPrimaryThreshold" style="margin:0 4px;padding:3px 6px;border:1px solid #cbd5e0;border-radius:4px;font-size:14px;">
+                    <option value="1">1 day</option>
+                    <option value="3">3 days</option>
+                    <option value="5" selected>5 days</option>
+                    <option value="7">7 days</option>
+                    <option value="14">14 days</option>
+                  </select></td>
+                <td style="padding:8px 10px;border:1px solid #e2e8f0;">Driver</td>
+                <td style="padding:8px 10px;border:1px solid #e2e8f0;">&#128172; Text</td>
+              </tr>
+              <tr style="background:#fffff0;">
+                <td style="padding:8px 10px;border:1px solid #e2e8f0;font-weight:600;">&#128295; All Vehicles (Defects)</td>
+                <td style="padding:8px 10px;border:1px solid #e2e8f0;">Defect Alert</td>
+                <td style="padding:8px 10px;border:1px solid #e2e8f0;">Defect recorded on pre-start</td>
+                <td style="padding:8px 10px;border:1px solid #e2e8f0;">Workshop / Fleet Manager + Zone Supervisor</td>
+                <td style="padding:8px 10px;border:1px solid #e2e8f0;">&#128231; Email</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Fixed Recipients -->
+        <div style="background:white;padding:14px;border-radius:8px;border:2px solid #e2e8f0;margin-bottom:14px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;">
+            <div style="font-weight:700;color:#2d3748;">&#128100; Fixed Recipients</div>
+            <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:#718096;cursor:pointer;user-select:none;">
+              <input type="checkbox" id="showFixedRecipientsToggle" onchange="toggleFixedRecipientsPanel()" style="cursor:pointer;">
+              Edit
+            </label>
+          </div>
+          <div style="font-size:13px;color:#718096;margin-top:6px;">&#128241; <strong>Ops Manager:</strong> Tania Tipene &nbsp;<span style="color:#276749;">&#10003; Mapped</span></div>
+          <div id="fixedRecipientsPanel" style="display:none;margin-top:12px;">
+            <div style="font-size:13px;color:#718096;margin-bottom:8px;">Update if the Ops Manager changes.</div>
+            <div class="form-row">
+              <div>
+                <label>Ops Manager mobile (Secondary alerts):</label>
+                <input id="opsManagerPhone" class="form-control" placeholder="+6421xxxxxxx" value="+64272229897" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Zone Supervisor Mapping -->
+        <div style="background:white;padding:14px;border-radius:8px;border:2px solid #e2e8f0;margin-bottom:14px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;">
+            <div style="font-weight:700;color:#2d3748;">&#128205; Zone &#8594; Supervisor Mobile</div>
+            <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:#718096;cursor:pointer;user-select:none;">
+              <input type="checkbox" id="showSupervisorToggle" onchange="toggleSupervisorPanel()" style="cursor:pointer;">
+              Edit / Remap
+            </label>
+          </div>
+          <div id="supervisorMappingStatus" style="font-size:13px;color:#718096;margin-top:6px;"></div>
+          <div id="supervisorMappingPanel" style="display:none;margin-top:12px;">
+            <div style="font-size:13px;color:#718096;margin-bottom:10px;">
+              Update supervisor names or numbers when zone assignments change.
+            </div>
+            <table id="zoneSupervisorTable" style="width:100%;border-collapse:collapse;font-size:15px;">
+              <thead><tr style="background:#f7fafc;">
+                <th style="padding:7px 10px;border:1px solid #e2e8f0;text-align:left;">Zone</th>
+                <th style="padding:7px 10px;border:1px solid #e2e8f0;text-align:left;">Supervisor Name</th>
+                <th style="padding:7px 10px;border:1px solid #e2e8f0;text-align:left;">Mobile (+64)</th>
+              </tr></thead>
+              <tbody id="zoneSupervisorBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Driver → Phone Mapping -->
+        <div style="background:white;padding:14px;border-radius:8px;border:2px solid #e2e8f0;margin-bottom:14px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;">
+            <div style="font-weight:700;color:#2d3748;">&#128101; Driver &#8594; Mobile Mapping</div>
+            <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:#718096;cursor:pointer;user-select:none;">
+              <input type="checkbox" id="showDriverMappingToggle" onchange="toggleDriverMappingPanel()" style="cursor:pointer;">
+              Edit / Remap
+            </label>
+          </div>
+          <div id="driverMappingStatus" style="font-size:13px;color:#718096;margin-top:6px;"></div>
+          <div id="driverMappingPanel" style="display:none;margin-top:12px;">
+            <div style="font-size:13px;color:#718096;margin-bottom:10px;">
+              Use this to update numbers when a driver changes or a phone number changes. Export CSV to save, Import CSV to restore.
+            </div>
+            <div class="form-row" style="margin-bottom:10px;">
+              <button id="loadDriversBtn" class="btn btn-primary">&#128100; Sync from Geotab</button>
+              <button id="importDriverCsvBtn" class="btn btn-secondary">&#128196; Import CSV</button>
+              <button id="exportDriverCsvBtn" class="btn btn-secondary">&#11123; Export CSV</button>
+              <input type="file" id="driverCsvInput" accept=".csv" style="display:none;" />
+            </div>
+            <table id="driverMappingTable" style="width:100%;border-collapse:collapse;font-size:14px;">
+              <thead>
+                <tr style="background:#f7fafc;">
+                  <th style="padding:7px 10px;border:1px solid #e2e8f0;text-align:left;">Driver Name</th>
+                  <th style="padding:7px 10px;border:1px solid #e2e8f0;text-align:left;">Driver ID</th>
+                  <th style="padding:7px 10px;border:1px solid #e2e8f0;text-align:left;">Mobile Number (+64)</th>
+                </tr>
+              </thead>
+              <tbody id="driverMappingBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Test SMS -->
+        <div style="padding:14px;background:white;border-radius:8px;border:2px solid #e2e8f0;">
+          <div style="font-weight:700;margin-bottom:10px;color:#2d3748;">&#129514; Test SMS</div>
+          <div class="form-row">
+            <input id="testSmsNumber" class="form-control" placeholder="+6421234567" style="max-width:250px;" />
+            <button id="testSmsBtn" class="btn btn-warning">&#128228; Send Test SMS</button>
+          </div>
+          <span id="smsTestResult" style="font-size:14px;"></span>
+        </div>
+
+        <!-- Hidden compat inputs -->
+        <input type="hidden" id="etxtApiKey" value="98iipsmdd6huv45D6G6V" />
+        <input type="hidden" id="etxtApiSecret" value="qYK8GKUWXuZBCGbDAyOpusMO0qpjHv" />
+        <input type="hidden" id="etxtWorkerUrl" value="https://uccl-etxt-proxy.francis-f0b.workers.dev" />
+        <input type="hidden" id="opsManagerName" value="Tania Tipene" />
+        <input type="hidden" id="smsHeavyThreshold" value="5" />
+        <textarea id="smsHeavyTemplate" style="display:none;">URGENT: {vehicleName} has been operating for {minutes} minutes without a pre-start inspection. - UCCL Safety</textarea>
+        <input type="hidden" id="smsLightThreshold" value="5" />
+        <textarea id="smsLightTemplate" style="display:none;">{vehicleName} has not had a pre-start inspection in {days} days. Complete DVIR before next trip. - UCCL Safety</textarea>
+        <div id="etxtContactsStatus" style="display:none;"></div>
+        <div id="etxtContactsMatchDetail" style="display:none;"></div>
+        <input type="hidden" id="loadEtxtContactsBtn" />
+      </div>
+      
+      <div id="infoBanner" class="alert alert-info" style="display:none;"></div>
+      <div id="progressContainer" style="display:none;">
+        <div class="progress-bar">
+          <div id="progressBar" class="progress-fill" style="width:0%;">0%</div>
+        </div>
+        <div id="progressText" class="muted" style="text-align:center;margin-top:8px;"></div>
+      </div>
+      <div class="form-row">
+        <div>
+          <label for="fromDate">From Date:</label>
+          <input id="fromDate" class="form-control" type="date" />
+        </div>
+        <div>
+          <label for="fromTime">From Time:</label>
+          <input id="fromTime" class="form-control" type="time" value="00:00" />
+        </div>
+        <div>
+          <label for="toDate">To Date:</label>
+          <input id="toDate" class="form-control" type="date" />
+        </div>
+        <div>
+          <label for="toTime">To Time:</label>
+          <input id="toTime" class="form-control" type="time" value="23:59" />
+        </div>
+      </div>
+      <div style="margin-bottom:20px;">
+        <label style="display:block;margin-bottom:8px;font-weight:600;color:#2d3748;">Quick Date Selection:</label>
+        <button id="quickToday" class="btn" style="background:#667eea;color:white;padding:8px 16px;font-size:14px;">Today</button>
+        <button id="quickYesterday" class="btn" style="background:#667eea;color:white;padding:8px 16px;font-size:14px;">Yesterday</button>
+        <button id="quickLast7" class="btn" style="background:#667eea;color:white;padding:8px 16px;font-size:14px;">Last Week</button>
+        <button id="quickLast30" class="btn" style="background:#667eea;color:white;padding:8px 16px;font-size:14px;">Last 30 Days</button>
+        <button id="quickThisWeek" class="btn" style="background:#667eea;color:white;padding:8px 16px;font-size:14px;">This Week</button>
+        <button id="quickThisMonth" class="btn" style="background:#667eea;color:white;padding:8px 16px;font-size:14px;">This Month</button>
+      </div>
+      <div>
+        <button id="getDvir" class="btn btn-success">📋 Retrieve Asset Inspection Sheets</button>
+        <button id="downloadCsv" class="btn btn-info">📊 Download Excel</button>
+        <button id="checkSmsAlerts" class="btn btn-warning">📱 Check SMS Alerts Now</button>
+      </div>
+
+      <!-- SMS Alert Status -->
+      <div id="smsAlertStatus" class="config-section" style="display:none;margin-top:20px;">
+        <h4>📱 SMS Alert Status</h4>
+        <div id="smsStatusMessage"></div>
+        <div id="smsAlertsTable" style="margin-top:15px;"></div>
+        
+        <!-- SMS Activity Log -->
+        <div style="margin-top:20px;">
+          <h5>SMS Activity Log</h5>
+          <div id="smsLog" class="sms-log"></div>
+        </div>
+      </div>
+      
+      <!-- Zone Statistics -->
+      <div id="zoneStatistics" style="display:none;"></div>
+      
+      <div id="dvirResult"></div>
+    </div>
+  </div>
+
+<script>
+// ============================================================================
+// GEOTAB API CALL - FIXED FOR GEOTAB ENVIRONMENT
+// ============================================================================
+async function callGeotabAPI(method, params = {}) {
+  // Check if running in Geotab Add-In environment
+  if (window.geotab && typeof window.geotab.call === 'function') {
+    return new Promise((resolve, reject) => {
+      window.geotab.call(method, params, resolve, reject);
+    });
+  }
+  
+  // Check for Geotab API object
+  if (window.api && typeof window.api.call === 'function') {
+    return new Promise((resolve, reject) => {
+      window.api.call(method, params, resolve, reject);
+    });
+  }
+  
+  // If neither is available, throw error
+  throw new Error('Geotab environment not detected. Please ensure this is running as a Geotab Add-In.');
+}
+
+// ============================================================================
+// DEBUG - Check Geotab Environment
+// ============================================================================
+console.log('=== UCCL Asset Inspection Module ===');
+console.log('window.geotab exists?', !!window.geotab);
+console.log('window.api exists?', !!window.api);
+if (window.geotab) {
+  console.log('window.geotab.call exists?', typeof window.geotab.call === 'function');
+}
+if (window.api) {
+  console.log('window.api.call exists?', typeof window.api.call === 'function');
+}
+console.log('=== Module Ready ===');
+
+let credentials = null;
+let serverUsed = null;
+let mappedDvirData = [];
+let ignitionData = {};
+let geotabZones = []; // Store zone definitions with boundaries
+
+// SMS Alert Variables
+let smsAlertHistory = new Map(); // Track sent alerts to avoid duplicates
+let smsLog = []; // SMS activity log
+let userPhoneMap = {}; // Map of driverId -> phone (built from driverPhoneMapping)
+let etxtContactsLoaded = false;
+let driverPhoneMapping = {
+  'b6':   { name: 'Renee Immers',              phone: '+64212341285' },
+  'b3E7': { name: 'Shaun Lazarus',             phone: '' },
+  'b2B6': { name: 'Darcy Johnson',             phone: '+642108640326' },
+  'b12B': { name: 'Josh Welch',                phone: '+64272780838' },
+  'b104': { name: 'Ronel Lineses',             phone: '+64226018205' },
+  'b113': { name: 'Paul Travers',              phone: '+64211731998' },
+  'b119': { name: 'Hetaraka Tenana',           phone: '+642108204523' },
+  'b1C2': { name: 'Robert Burns',              phone: '+642040965375' },
+  'bC0':  { name: 'Jimar Balatucan',           phone: '+642108953188' },
+  'b118': { name: 'Daniel van Houten',         phone: '+64274124596' },
+  'bF8':  { name: 'Daryl Deticio',             phone: '+642108933755' },
+  'bF3':  { name: 'Luke Ryder',                phone: '+64272474321' },
+  'bBB':  { name: 'Aden Abernethy',            phone: '+642041398733' },
+  'b116': { name: 'Richard Canterbury',        phone: '+64210787077' },
+  'bD1':  { name: 'Cameron Hinge',             phone: '+64272790220' },
+  'bCC':  { name: 'James Dow',                 phone: '+64220481237' },
+  'b110': { name: 'Joel Teaupa',               phone: '+64223061517' },
+  'bD5':  { name: 'Zain Kader',                phone: '' },
+  'b11E': { name: 'Nick Stewart',              phone: '+64272456884' },
+  'b11C': { name: 'Engelbert van Schalkwyk',   phone: '+64272903708' },
+  'b100': { name: 'Paul Hawkins',              phone: '+64273802597' },
+  'b142': { name: 'Pat Clotworthy',            phone: '+64278018583' },
+  'b10B': { name: 'Gary Blackwood',            phone: '+6421910325' },
+  'b153': { name: 'Iri Ritchie',               phone: '+64273493234' },
+  'b18B': { name: 'Arthur Ruedi',              phone: '+64273162583' },
+  'b12D': { name: 'Rob Wilson',                phone: '+64273154464' },
+  'b3CC': { name: 'Clayton Douglas',           phone: '+64226855741' },
+  'bCB':  { name: 'Harris Crowe',              phone: '+64273542429' },
+  'b12F': { name: 'Alex Fitch',                phone: '' },
+  'b3C6': { name: 'Malcolm Roberts',           phone: '' },
+  'b115': { name: 'Lee Clasper',               phone: '+64274864004' },
+  'b102': { name: 'Zac Johnstone',             phone: '+6421929384' },
+  'b195': { name: 'Thomas Blaza',              phone: '+64272171718' },
+  'bC9':  { name: 'Tom Collis',                phone: '' },
+  'bD6':  { name: 'Grant Little',              phone: '+64274864025' },
+  'bF5':  { name: 'Berne Connelly',            phone: '+64272989630' },
+  'b1C6': { name: 'John Munnelly',             phone: '' },
+  'bC4':  { name: 'Tim Brophy',                phone: '+64211617396' },
+  'bF7':  { name: 'Steve de Leeuw',            phone: '+6421343927' },
+  'bC3':  { name: 'Felix Bongalos',            phone: '+642108436875' },
+  'bD9':  { name: 'Lyle McGaughey',            phone: '+6421353734' },
+  'b152': { name: 'Tony Abiad',                phone: '+64273404565' },
+  'bCD':  { name: 'Jacob Dunn',                phone: '+64210522986' },
+  'bF0':  { name: 'Mahesh Prasad',             phone: '+64212088829' },
+  'bDB':  { name: 'Akash Nada',                phone: '' },
+  'b128': { name: 'Mike Walters',              phone: '+64272109377' },
+  'b129': { name: 'Jamie Wyeth',               phone: '+64225813468' },
+  'b11D': { name: 'Gerrie van der Linde',      phone: '+642102433500' },
+  'b1B1': { name: 'Andrew Davidson',           phone: '+6421403156' },
+  'bBD':  { name: 'Gary Annan',                phone: '+64274035402' },
+  'b1C4': { name: 'Izak Proctor',              phone: '+64221367321' },
+  'b12A': { name: 'Damien Walters',            phone: '+64272692577' },
+  'b112': { name: 'Shane Tipene',              phone: '+64220330213' },
+  'bD0':  { name: 'Daniel Hemara',             phone: '+64273231257' },
+  'bDE':  { name: 'Michael Polglase',          phone: '+64211780039' },
+  'bE9':  { name: 'Witapeta Nathan',           phone: '+64211201450' },
+  'b25A': { name: 'Sub Contractor',            phone: '' },
+  'bF2':  { name: 'Carl Riesterer',            phone: '+64210778260' },
+  'bFE':  { name: 'Robert Going',              phone: '+64274747808' },
+  'b108': { name: 'Rico Cemino',               phone: '+64210383728' },
+  'bFC':  { name: 'William Gibson',            phone: '+64274800186' },
+  'b222': { name: 'Lucas Thorburn',            phone: '+642102270619' },
+  'bC6':  { name: 'Craig Butterworth',         phone: '+64274794849' },
+  'b2CB': { name: 'Colin Newbold',             phone: '' },
+  'bED':  { name: 'Alvin Perez',               phone: '+64210520400' },
+  'b1A6': { name: 'Anthony Edwards',           phone: '+642108277672' },
+  'b229': { name: 'James McCarthy',            phone: '+64272796608' },
+  'b317': { name: 'Christiaan Bester',         phone: '' },
+  'b3E0': { name: 'Tui Peters',                phone: '' },
+  'b4':   { name: 'Francis (Test)',            phone: '+6421923999' },
+};
+
+// Initialise phone map from hardcoded data
+(function() { rebuildUserPhoneMap(); })();
+
+function getEtxtConfig() {
+  return {
+    workerUrl: (document.getElementById('etxtWorkerUrl')?.value || '').replace(/\/$/, '').trim(),
+    apiKey:    (document.getElementById('etxtApiKey')?.value    || '').trim(),
+    apiSecret: (document.getElementById('etxtApiSecret')?.value || '').trim()
+  };
+}
+
+// Predefined zone list from Advanced_Zone_List spreadsheet
+const PREDEFINED_ZONES = [
+  "Channel Infrastructure",
+  "Donald Road",
+  "Gillingham Road",
+  "Kaikohe",
+  "Kaikohe Work Area",
+  "Kaitaia Wastewater",
+  "Kiwirail",
+  "Mangawhai",
+  "Matauri Bay",
+  "Maungaturoto Solar Farm",
+  "Ngawha",
+  "Northpower Dargaville",
+  "Port Road Site Office",
+  "Rocket Lab",
+  "Ruakaka BESS",
+  "Ruakaka Solar Farm Site 1",
+  "Ruakaka Solar Farm Site 2",
+  "Ruakaka Solar Farm Site 3",
+  "Te Mihi"
+];
+
+function setDefaultDates(){
+  const today = new Date();
+  const lastWeek = new Date(today.getTime() - 7*24*60*60*1000);
+  document.getElementById('toDate').value = today.toISOString().split('T')[0];
+  document.getElementById('fromDate').value = lastWeek.toISOString().split('T')[0];
+  document.getElementById('fromTime').value = '00:00';
+  document.getElementById('toTime').value = '23:59';
+}
+setDefaultDates();
+
+// Quick date selection handlers
+document.getElementById('quickToday')?.addEventListener('click', function() {
+  const today = new Date();
+  document.getElementById('fromDate').value = today.toISOString().split('T')[0];
+  document.getElementById('toDate').value = today.toISOString().split('T')[0];
+  document.getElementById('fromTime').value = '00:00';
+  document.getElementById('toTime').value = '23:59';
+});
+
+document.getElementById('quickYesterday')?.addEventListener('click', function() {
+  const yesterday = new Date(Date.now() - 24*60*60*1000);
+  document.getElementById('fromDate').value = yesterday.toISOString().split('T')[0];
+  document.getElementById('toDate').value = yesterday.toISOString().split('T')[0];
+  document.getElementById('fromTime').value = '00:00';
+  document.getElementById('toTime').value = '23:59';
+});
+
+document.getElementById('quickLast7')?.addEventListener('click', function() {
+  const today = new Date();
+  const dayOfWeek = today.getDay();
+  const thisMonday = new Date(today.getTime() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1) * 24*60*60*1000);
+  const lastMonday = new Date(thisMonday.getTime() - 7*24*60*60*1000);
+  const lastSunday = new Date(lastMonday.getTime() + 6*24*60*60*1000);
+  document.getElementById('fromDate').value = lastMonday.toISOString().split('T')[0];
+  document.getElementById('toDate').value = lastSunday.toISOString().split('T')[0];
+  document.getElementById('fromTime').value = '00:00';
+  document.getElementById('toTime').value = '23:59';
+});
+
+document.getElementById('quickLast30')?.addEventListener('click', function() {
+  const today = new Date();
+  const last30 = new Date(Date.now() - 30*24*60*60*1000);
+  document.getElementById('fromDate').value = last30.toISOString().split('T')[0];
+  document.getElementById('toDate').value = today.toISOString().split('T')[0];
+  document.getElementById('fromTime').value = '00:00';
+  document.getElementById('toTime').value = '23:59';
+});
+
+document.getElementById('quickThisWeek')?.addEventListener('click', function() {
+  const today = new Date();
+  const dayOfWeek = today.getDay();
+  const monday = new Date(today.getTime() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1) * 24*60*60*1000);
+  document.getElementById('fromDate').value = monday.toISOString().split('T')[0];
+  document.getElementById('toDate').value = today.toISOString().split('T')[0];
+  document.getElementById('fromTime').value = '00:00';
+  document.getElementById('toTime').value = '23:59';
+});
+
+document.getElementById('quickThisMonth')?.addEventListener('click', function() {
+  const today = new Date();
+  const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+  document.getElementById('fromDate').value = firstDay.toISOString().split('T')[0];
+  document.getElementById('toDate').value = today.toISOString().split('T')[0];
+  document.getElementById('fromTime').value = '00:00';
+  document.getElementById('toTime').value = '23:59';
+});
+
+function showMessage(elId, msg, type='info'){
+  const el = document.getElementById(elId);
+  const c = type==='error'?'alert-error':type==='success'?'alert-success':type==='warning'?'alert-warning':'alert-info';
+  if (el) {
+    el.style.display = '';
+    el.innerHTML = `<div class="alert ${c}">${msg}</div>`;
+  }
+}
+
+function updateProgress(current, total, text = '') {
+  const container = document.getElementById('progressContainer');
+  const bar = document.getElementById('progressBar');
+  const textEl = document.getElementById('progressText');
+  
+  if (total === 0) {
+    if (container) container.style.display = 'none';
+    return;
+  }
+  
+  if (container) container.style.display = 'block';
+  const percentage = Math.round((current / total) * 100);
+  if (bar) bar.style.width = `${percentage}%`;
+  if (bar) bar.textContent = `${percentage}%`;
+  if (textEl) textEl.textContent = text || `Processing ${current} of ${total} locations...`;
+}
+
+function extractId(data){
+  if(!data) return null;
+  if(typeof data==='object' && data.id) return data.id;
+  if(typeof data==='string'){ try{ return JSON.parse(data).id || null }catch(e){ return data } }
+  return null;
+}
+
+function extractLocation(loc){
+  if(!loc) return {latitude:null, longitude:null};
+  if(typeof loc==='object'){
+    if(loc.location && loc.location.x && loc.location.y) return {latitude:loc.location.y, longitude:loc.location.x};
+    if(loc.x && loc.y) return {latitude:loc.y, longitude:loc.x};
+  }
+  if(typeof loc==='string'){
+    try{
+      const p = JSON.parse(loc);
+      if(p.location && p.location.x && p.location.y) return {latitude:p.location.y, longitude:p.location.x};
+      if(p.x && p.y) return {latitude:p.y, longitude:p.x};
+    }catch(e){}
+  }
+  return {latitude:null, longitude:null};
+}
+
+function isPointInPolygon(point, polygon) {
+  if (!polygon || polygon.length < 3) return false;
+  
+  const x = point.longitude;
+  const y = point.latitude;
+  let inside = false;
+  
+  for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+    const xi = polygon[i].x;
+    const yi = polygon[i].y;
+    const xj = polygon[j].x;
+    const yj = polygon[j].y;
+    
+    const intersect = ((yi > y) !== (yj > y))
+        && (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
+    if (intersect) inside = !inside;
+  }
+  
+  return inside;
+}
+
+async function fetchGeotabZones() {
+  try {
+    showMessage('infoBanner', '📍 Fetching zone definitions from Geotab...', 'info');
+    
+    const zones = await callGeotabAPI('Get', {
+      typeName: 'Zone',
+      resultsLimit: 5000
+    });
+    
+    if (zones && zones.length > 0) {
+      geotabZones = zones.filter(zone => {
+        const zoneName = zone.name || zone.Name || '';
+        return PREDEFINED_ZONES.includes(zoneName);
+      }).map(zone => ({
+        id: zone.id,
+        name: zone.name || zone.Name,
+        points: zone.points || zone.Points || [],
+        polygon: (zone.points || zone.Points || []).map(p => ({
+          x: p.x || p.X || 0,
+          y: p.y || p.Y || 0
+        }))
+      }));
+      
+      console.log(`Loaded ${geotabZones.length} zone definitions from Geotab:`, geotabZones.map(z => z.name));
+      return geotabZones;
+    }
+  } catch (error) {
+    console.error('Error fetching zones from Geotab:', error);
+    showMessage('infoBanner', '⚠️ Could not fetch zone definitions. Zones may not be assigned correctly.', 'warning');
+  }
+  
+  return [];
+}
+
+function matchCoordinatesToZones(latitude, longitude) {
+  if (!latitude || !longitude || !geotabZones.length) {
+    return [];
+  }
+  
+  const matchedZones = [];
+  const point = { latitude, longitude };
+  
+  for (const zone of geotabZones) {
+    if (zone.polygon && zone.polygon.length >= 3) {
+      if (isPointInPolygon(point, zone.polygon)) {
+        matchedZones.push(zone.name);
+      }
+    }
+  }
+  
+  return matchedZones;
+}
+
+async function getGeotabAddresses(coordinates) {
+  if (!coordinates.length) return [];
+  
+  const geotabCoords = coordinates.map(c => ({ x: Number(c.lon), y: Number(c.lat) }));
+  
+  try {
+    const results = await callGeotabAPI('GetAddresses', { coordinates: geotabCoords });
+    
+    return results.map(r => ({
+      formattedAddress: (r && (r.formattedAddress || r.FormattedAddress)) || '',
+      city: r && (r.city || r.City),
+      country: r && (r.country || r.Country),
+      postalCode: r && (r.postalCode || r.PostalCode),
+      street: r && (r.street || r.Street),
+      streetName: r && (r.streetName || r.StreetName),
+      streetNumber: r && (r.streetNumber || r.StreetNumber),
+      zones: (r && (r.zones || r.Zones) || []).map(z => (z && (z.name || z.Name)) || '').filter(Boolean)
+    }));
+  } catch (error) {
+    console.log('GetAddresses API error:', error);
+    return coordinates.map(() => ({ formattedAddress: '', zones: [] }));
+  }
+}
+
+async function resolveAllAddresses(rows) {
+  const points = [];
+  rows.forEach((r, idx) => {
+    if (r.latitude != null && r.longitude != null) {
+      points.push({ lat: r.latitude, lon: r.longitude, idx });
+    }
+  });
+  
+  if (!points.length) {
+    return;
+  }
+  
+  const BATCH_SIZE = 50;
+  
+  for (let start = 0; start < points.length; start += BATCH_SIZE) {
+    const chunk = points.slice(start, start + BATCH_SIZE);
+    const progress = Math.min(start + BATCH_SIZE, points.length);
+    
+    updateProgress(start, points.length, `Resolving addresses ${progress}/${points.length}...`);
+    
+    try {
+      const addresses = await getGeotabAddresses(chunk);
+      
+      addresses.forEach((addr, i) => {
+        const rowIndex = chunk[i].idx;
+        const row = rows[rowIndex];
+        
+        if (addr.formattedAddress && addr.formattedAddress.trim()) {
+          row.resolvedAddress = addr.formattedAddress.trim();
+        }
+        
+        let zones = addr.zones || [];
+        
+        if (zones.length === 0 && geotabZones.length > 0) {
+          zones = matchCoordinatesToZones(row.latitude, row.longitude);
+          if (zones.length > 0) {
+            console.log(`Matched coordinates (${row.latitude}, ${row.longitude}) to zones:`, zones);
+          }
+        }
+        
+        row.zones = zones;
+      });
+      
+      const selectedZone = document.getElementById('zoneFilter').value;
+      const filteredData = filterDataByZone(rows, selectedZone);
+      renderTable(filteredData);
+      
+    } catch (error) {
+      console.error('Error in address resolution batch:', error);
+    }
+    
+    if (start + BATCH_SIZE < points.length) {
+      await new Promise(resolve => setTimeout(resolve, 500));
+    }
+  }
+  
+  updateProgress(points.length, points.length, 'Complete!');
+}
+
+async function getIgnitionData(fromDate, toDate) {
+  try {
+    showMessage('infoBanner', '🔍 Retrieving trip/ignition data...', 'info');
+
+    const trips = await callGeotabAPI('Get', {
+      typeName: 'Trip',
+      search: {
+        fromDate: fromDate + 'T00:00:00.000Z',
+        toDate:   toDate   + 'T23:59:59.999Z'
+      }
+    });
+
+    ignitionData = {};
+    (trips || []).forEach(trip => {
+      const deviceId = extractId(trip.device);
+      if (!deviceId || !trip.start) return;
+      if (!ignitionData[deviceId]) ignitionData[deviceId] = [];
+      ignitionData[deviceId].push({
+        start: new Date(trip.start),
+        stop:  trip.stop ? new Date(trip.stop) : null
+      });
+    });
+
+    Object.keys(ignitionData).forEach(id => {
+      ignitionData[id].sort((a, b) => a.start - b.start);
+    });
+
+    const tripCount   = (trips || []).length;
+    const deviceCount = Object.keys(ignitionData).length;
+    console.log(`Trip data loaded: ${tripCount} trips, ${deviceCount} devices`);
+    showMessage('infoBanner', `✅ Loaded ${tripCount} trips across ${deviceCount} devices`, 'success');
+    return ignitionData;
+
+  } catch (error) {
+    console.error('Trip data error:', error);
+    showMessage('infoBanner', '⚠️ Could not retrieve trip data — ignition times will be empty', 'warning');
+    return {};
+  }
+}
+
+function findRelevantIgnitionTime(deviceId, inspectionTime) {
+  const trips = ignitionData[deviceId];
+  if (!trips || trips.length === 0) return null;
+
+  for (let i = trips.length - 1; i >= 0; i--) {
+    if (trips[i].start <= inspectionTime) {
+      return trips[i].start;
+    }
+  }
+  return null;
+}
+
+function checkOverdueInspections(rows) {
+  const alertWindow = parseInt(document.getElementById('alertWindow').value) || 5;
+  
+  const now = new Date();
+  
+  return rows.map(row => {
+    const inspectionTime = new Date(row.rawDateTime);
+    const deviceId = row.deviceId;
+    
+    row.isOverdue = false;
+    row.ignitionTime = null;
+    row.timeToInspection = null;
+    
+    const ignitionTime = findRelevantIgnitionTime(deviceId, inspectionTime);
+    
+    if (ignitionTime) {
+      row.ignitionTime = ignitionTime;
+      const timeDiff = (inspectionTime - ignitionTime) / (1000 * 60);
+      row.timeToInspection = Math.round(timeDiff);
+      
+      if (row.isInspectedByDriver && timeDiff > alertWindow) {
+        row.isOverdue = true;
+      } else if (!row.isInspectedByDriver) {
+        const timeSinceIgnition = (now - ignitionTime) / (1000 * 60);
+        if (timeSinceIgnition > alertWindow) {
+          row.isOverdue = true;
+        }
+      }
+    }
+
+    return row;
+  });
+}
+
+function generateZoneStatistics(rows) {
+  const zoneStats = {};
+  let totalInspections = 0;
+  let totalWithDefects = 0;
+  let totalOverdue = 0;
+  
+  rows.forEach(row => {
+    const zones = row.zones && row.zones.length > 0 ? row.zones : ['no-zone'];
+    
+    zones.forEach(zone => {
+      if (!zoneStats[zone]) {
+        zoneStats[zone] = {
+          inspections: 0,
+          withDefects: 0,
+          overdue: 0,
+          safe: 0,
+          unsafe: 0
+        };
+      }
+      
+      zoneStats[zone].inspections++;
+      totalInspections++;
+      
+      if (row.defects && row.defects !== '[]' && row.defects !== '') {
+        zoneStats[zone].withDefects++;
+        totalWithDefects++;
+      }
+      
+      if (row.isOverdue) {
+        zoneStats[zone].overdue++;
+        totalOverdue++;
+      }
+      
+      if (row.isSafeToOperate === true) {
+        zoneStats[zone].safe++;
+      } else if (row.isSafeToOperate === false) {
+        zoneStats[zone].unsafe++;
+      }
+    });
+  });
+  
+  return { zoneStats, totalInspections, totalWithDefects, totalOverdue };
+}
+
+function renderZoneStatistics(rows) {
+  const stats = generateZoneStatistics(rows);
+  const statsDiv = document.getElementById('zoneStatistics');
+  
+  let html = `<h3 class="card-title">📊 Zone Statistics</h3>`;
+  
+  html += `<div class="zone-stats">
+    <div class="zone-stat-card">
+      <div class="zone-stat-value">${stats.totalInspections}</div>
+      <div class="zone-stat-label">Total Inspections</div>
+    </div>
+    <div class="zone-stat-card">
+      <div class="zone-stat-value">${stats.totalWithDefects}</div>
+      <div class="zone-stat-label">With Defects</div>
+    </div>
+    <div class="zone-stat-card">
+      <div class="zone-stat-value">${stats.totalOverdue}</div>
+      <div class="zone-stat-label">Overdue</div>
+    </div>
+  </div>`;
+  
+  const sortedZones = Object.keys(stats.zoneStats).sort((a, b) => 
+    stats.zoneStats[b].inspections - stats.zoneStats[a].inspections
+  );
+  
+  if (sortedZones.length > 0) {
+    html += `<h4 style="margin:20px 0 10px 0;">Per Zone Breakdown</h4>`;
+    html += `<div class="zone-stats">`;
+    
+    sortedZones.forEach(zone => {
+      const zoneStat = stats.zoneStats[zone];
+      const defectRate = Math.round((zoneStat.withDefects / zoneStat.inspections) * 100);
+      const overdueRate = Math.round((zoneStat.overdue / zoneStat.inspections) * 100);
+      
+      html += `
+        <div class="zone-stat-card">
+          <div class="zone-stat-label" style="font-weight:600;margin-bottom:8px;">${zone === 'no-zone' ? 'No Zone' : zone}</div>
+          <div class="zone-stat-value">${zoneStat.inspections}</div>
+          <div class="zone-stat-label">Inspections</div>
+          <div style="margin-top:8px;font-size:0.9em;">
+            <div>🔧 ${zoneStat.withDefects} defects (${defectRate}%)</div>
+            <div>⏰ ${zoneStat.overdue} overdue (${overdueRate}%)</div>
+            <div>✅ ${zoneStat.safe} safe</div>
+            <div>❌ ${zoneStat.unsafe} unsafe</div>
+          </div>
+        </div>
+      `;
+    });
+    
+    html += `</div>`;
+  }
+  
+  if (statsDiv) {
+    statsDiv.innerHTML = html;
+    statsDiv.style.display = 'block';
+  }
+}
+
+let currentSortColumn = null;
+let currentSortDirection = 'asc';
+
+function sortData(data, column, direction) {
+  const sorted = [...data];
+  sorted.sort((a, b) => {
+    let valA, valB;
+
+    switch(column) {
+      case 'dateTime':
+        valA = a.rawDateTime || 0;
+        valB = b.rawDateTime || 0;
+        break;
+      case 'driverName':
+      case 'vehicleName':
+      case 'driverRemark':
+        valA = (a[column] || '').toLowerCase();
+        valB = (b[column] || '').toLowerCase();
+        break;
+      case 'odometer':
+      case 'engineHours':
+        valA = a[column] || 0;
+        valB = b[column] || 0;
+        break;
+      case 'isSafeToOperate':
+        valA = a.isSafeToOperate === true ? 2 : a.isSafeToOperate === false ? 0 : 1;
+        valB = b.isSafeToOperate === true ? 2 : b.isSafeToOperate === false ? 0 : 1;
+        break;
+      case 'isInspectedByDriver':
+        valA = a.isInspectedByDriver ? 1 : 0;
+        valB = b.isInspectedByDriver ? 1 : 0;
+        break;
+      case 'zones':
+        valA = (a.zones || []).join(',');
+        valB = (b.zones || []).join(',');
+        break;
+      case 'location':
+        valA = a.resolvedAddress || '';
+        valB = b.resolvedAddress || '';
+        break;
+      default:
+        valA = a[column];
+        valB = b[column];
+    }
+
+    if (valA < valB) return direction === 'asc' ? -1 : 1;
+    if (valA > valB) return direction === 'asc' ? 1 : -1;
+    return 0;
+  });
+  return sorted;
+}
+
+function sortTable(column) {
+  if (currentSortColumn === column) {
+    currentSortDirection = currentSortDirection === 'asc' ? 'desc' : 'asc';
+  } else {
+    currentSortColumn = column;
+    currentSortDirection = 'asc';
+  }
+
+  const selectedZone = document.getElementById('zoneFilter').value;
+  const filteredByZone = filterDataByZone(mappedDvirData, selectedZone);
+  const filteredData = filterDataByStatusAndType(filteredByZone);
+  const sortedData = sortData(filteredData, column, currentSortDirection);
+
+  renderTable(sortedData);
+}
+
+function renderTable(rows){
+  const resultDiv = document.getElementById('dvirResult');
+
+  let html = `<table class="dvir-table"><thead><tr>
+    <th onclick="sortTable('dateTime')" style="cursor:pointer;">Date/Time ${currentSortColumn === 'dateTime' ? (currentSortDirection === 'asc' ? '▲' : '▼') : ''}</th>
+    <th onclick="sortTable('driverName')" style="cursor:pointer;">Driver ${currentSortColumn === 'driverName' ? (currentSortDirection === 'asc' ? '▲' : '▼') : ''}</th>
+    <th onclick="sortTable('vehicleName')" style="cursor:pointer;">Vehicle ${currentSortColumn === 'vehicleName' ? (currentSortDirection === 'asc' ? '▲' : '▼') : ''}</th>
+    <th onclick="sortTable('isSafeToOperate')" style="cursor:pointer;">Status ${currentSortColumn === 'isSafeToOperate' ? (currentSortDirection === 'asc' ? '▲' : '▼') : ''}</th>
+    <th onclick="sortTable('isInspectedByDriver')" style="cursor:pointer;">Driver Inspected ${currentSortColumn === 'isInspectedByDriver' ? (currentSortDirection === 'asc' ? '▲' : '▼') : ''}</th>
+    <th>Defects</th>
+    <th onclick="sortTable('location')" style="cursor:pointer;">Location ${currentSortColumn === 'location' ? (currentSortDirection === 'asc' ? '▲' : '▼') : ''}</th>
+    <th onclick="sortTable('zones')" style="cursor:pointer;">Zones ${currentSortColumn === 'zones' ? (currentSortDirection === 'asc' ? '▲' : '▼') : ''}</th>
+    <th onclick="sortTable('odometer')" style="cursor:pointer;">Odometer ${currentSortColumn === 'odometer' ? (currentSortDirection === 'asc' ? '▲' : '▼') : ''}</th>
+    <th onclick="sortTable('engineHours')" style="cursor:pointer;">Engine Hours ${currentSortColumn === 'engineHours' ? (currentSortDirection === 'asc' ? '▲' : '▼') : ''}</th>
+    <th onclick="sortTable('driverRemark')" style="cursor:pointer;">Hubbo KM's ${currentSortColumn === 'driverRemark' ? (currentSortDirection === 'asc' ? '▲' : '▼') : ''}</th>
+   </tr></thead><tbody>`;
+  
+  let overdueCount = 0;
+  
+  rows.forEach((r, index) => {
+    if (r.isOverdue) overdueCount++;
+
+    const status = r.isSafeToOperate===true?'<span class="status-safe">SAFE</span>':
+                  r.isSafeToOperate===false?'<span class="status-unsafe">⚠️ UNSAFE</span>':
+                  r.isOverdue?'<span class="status-overdue">⏰ OVERDUE</span>':
+                  '<span class="status-unknown">UNKNOWN</span>';
+
+    let defectDisplay = '<em class="muted">None</em>';
+    if (r.defects && r.defects !== '[]' && r.defects !== '') {
+      try{
+        const d = JSON.parse(r.defects);
+        if(Array.isArray(d)&&d.length>0) {
+          const defectList = d.map(def => {
+            let defectName = '';
+
+            if (def.defectRemarks && Array.isArray(def.defectRemarks) && def.defectRemarks.length > 0) {
+              defectName = def.defectRemarks[0].remark || def.defectRemarks[0].Remark || '';
+            }
+
+            if (!defectName && def.defect && typeof def.defect === 'object') {
+              defectName = def.defect.name || def.defect.Name || '';
+            }
+
+            if (!defectName && def.part && typeof def.part === 'object') {
+              defectName = def.part.name || def.part.Name || '';
+            }
+
+            if (!defectName) {
+              defectName = def.name || def.Name || def.remark || def.Remark || 'Defect detected';
+            }
+
+            const repairStatus = def.repairStatus || def.RepairStatus || '';
+            return `${defectName}${repairStatus ? ' [' + repairStatus + ']' : ''}`;
+          }).join(', ');
+          defectDisplay = `<span style="color:#e53e3e;font-weight:600;">⚠️ ${defectList}</span>`;
+        }
+      }
+      catch(e){
+        console.error('Error parsing defects:', e, 'Raw defects:', r.defects);
+        if(r.defects.length>10) defectDisplay = '<span style="color:#e53e3e;font-weight:600;">⚠️ Defects present</span>';
+      }
+    }
+
+    let locationDisplay = '<em class="muted">No location</em>';
+    if (r.latitude && r.longitude) {
+      if (r.resolvedAddress && r.resolvedAddress.trim() && r.resolvedAddress.length > 8) {
+        locationDisplay = `<div class="real-address">📍 ${r.resolvedAddress}</div>`;
+      } else {
+        const coords = `${Number(r.latitude).toFixed(6)}, ${Number(r.longitude).toFixed(6)}`;
+        locationDisplay = `<span class="coord-only">${coords}</span>`;
+      }
+    }
+
+    const zonesDisplay = r.zones && r.zones.length > 0
+      ? r.zones.map(z => `<span class="zone-pill">${z}</span>`).join('')
+      : '<em class="muted">No zone</em>';
+
+    let ignitionInfo = '';
+    if (r.ignitionTime) {
+      const ignitionStr = new Date(r.ignitionTime).toLocaleString('en-NZ', { timeZone: 'Pacific/Auckland' });
+      const timeDiff = r.timeToInspection;
+      ignitionInfo = `<div class="ignition-info">Ignition: ${ignitionStr} (${timeDiff}min before)</div>`;
+    }
+
+    html += `<tr data-inspection-id="${r.id}">
+      <td>${r.dateTime}${ignitionInfo}</td>
+      <td><strong>${r.driverName}</strong></td>
+      <td><strong>${r.vehicleName}</strong></td>
+      <td>${status}</td>
+      <td>${r.isInspectedByDriver===true?'✅ Yes':'❌ No'}</td>
+      <td>${defectDisplay}</td>
+      <td>${locationDisplay}</td>
+      <td>${zonesDisplay}</td>
+      <td>${r.odometer?Math.round(r.odometer/1000*100)/100+' km':'N/A'}</td>
+      <td>${r.engineHours?Math.round(r.engineHours/3600*100)/100+' hrs':'N/A'}}\\n       <td>${r.driverRemark || '<em class="muted">No remarks</em>'}</td>
+     </tr>`;
+  });
+  
+  if (overdueCount > 0) {
+    html = `<div class="alert alert-warning">⚠️ <strong>${overdueCount} overdue inspection(s) detected!</strong> These inspections were completed more than ${document.getElementById('alertWindow').value} minutes after ignition.</div>` + html;
+  }
+  
+  html += `</tbody></table>`;
+  if (resultDiv) resultDiv.innerHTML = html;
+}
+
+function filterDataByZone(data, selectedZone) {
+  if (!selectedZone || selectedZone === '') {
+    return data;
+  }
+  
+  if (selectedZone === 'no-zone') {
+    return data.filter(row => !row.zones || row.zones.length === 0);
+  }
+  
+  return data.filter(row => {
+    return row.zones && Array.isArray(row.zones) && row.zones.includes(selectedZone);
+  });
+}
+
+function filterNotNecessaryDefects(data) {
+  return data.filter(row => {
+    if (!row.defects || row.defects === '[]' || row.defects === '') {
+      return true;
+    }
+    
+    try {
+      const defects = JSON.parse(row.defects);
+      if (!Array.isArray(defects) || defects.length === 0) {
+        return true;
+      }
+      
+      const hasNotNecessary = defects.some(def => {
+        const repairStatus = (def.repairStatus || def.RepairStatus || '').toLowerCase();
+        return repairStatus.replace(/\s+/g, '') === 'notnecessary';
+      });
+      
+      return !hasNotNecessary;
+      
+    } catch (e) {
+      console.error('Error parsing defects for filtering:', e, row.defects);
+      return true;
+    }
+  });
+}
+
+function filterDataByStatusAndType(data) {
+  const hideNotNecessary = true;
+  
+  let filtered = data;
+  
+  if (hideNotNecessary) {
+    filtered = filtered.filter(r => {
+      if (!r.defects || r.defects === '[]' || r.defects === '') {
+        return true;
+      }
+      
+      const defectsStr = r.defects.toLowerCase();
+      if (defectsStr.includes('notnecessary') || defectsStr.includes('not necessary')) {
+        try {
+          const defectArray = JSON.parse(r.defects);
+          if (Array.isArray(defectArray) && defectArray.length > 0) {
+            const allNotNecessary = defectArray.every(def => {
+              const repairStatus = (def.repairStatus || def.RepairStatus || '').toLowerCase();
+              const remark = (def.remark || def.Remark || '').toLowerCase();
+              const defectRemarks = def.defectRemarks || [];
+              
+              if (repairStatus.includes('notnecessary') || repairStatus.includes('not necessary')) {
+                return true;
+              }
+              
+              if (remark.includes('notnecessary') || remark.includes('not necessary')) {
+                return true;
+              }
+              
+              if (Array.isArray(defectRemarks)) {
+                const hasNotNecessary = defectRemarks.some(dr => {
+                  const remarkText = (dr.remark || dr.Remark || '').toLowerCase();
+                  return remarkText.includes('notnecessary') || remarkText.includes('not necessary');
+                });
+                if (hasNotNecessary) return true;
+              }
+              
+              return false;
+            });
+            
+            if (allNotNecessary) {
+              return false;
+            }
+          }
+        } catch (e) {
+          if (defectsStr.includes('notnecessary') || defectsStr.includes('not necessary')) {
+            return false;
+          }
+        }
+      }
+      
+      return true;
+    });
+  }
+  
+  return filtered;
+}
+
+function updateZoneDropdown() {
+  const zoneFilter = document.getElementById('zoneFilter');
+  if (!zoneFilter) return;
+  
+  zoneFilter.innerHTML = '<option value="">All Zones</option><option value="no-zone">No Zone Assigned</option>';
+  
+  PREDEFINED_ZONES.forEach(zone => {
+    const option = document.createElement('option');
+    option.value = zone;
+    option.textContent = zone;
+    zoneFilter.appendChild(option);
+  });
+  
+  console.log('Updated zone dropdown with predefined zones:', PREDEFINED_ZONES);
+}
+
+// ============================================================================
+// SMS ALERT FUNCTIONS (eTXT / Spark NZ)
+// ============================================================================
+
+function rebuildUserPhoneMap() {
+  userPhoneMap = {};
+  Object.entries(driverPhoneMapping).forEach(([id, d]) => {
+    if (d.phone) userPhoneMap[id] = d.phone;
+  });
+  const count = Object.keys(userPhoneMap).length;
+  const status = document.getElementById('driverMappingStatus');
+  if (status) status.innerHTML = `📱 <strong>${count}</strong> of ${Object.keys(driverPhoneMapping).length} drivers have mobile numbers mapped` + (count < Object.keys(driverPhoneMapping).length ? ` &nbsp;<span style="color:#c05621;">(${Object.keys(driverPhoneMapping).length - count} missing)</span>` : ` &nbsp;<span style="color:#276749;">✓ All mapped</span>`);
+}
+
+function toggleFixedRecipientsPanel() {
+  const show = document.getElementById('showFixedRecipientsToggle')?.checked;
+  const panel = document.getElementById('fixedRecipientsPanel');
+  if (panel) panel.style.display = show ? 'block' : 'none';
+}
+
+function toggleSupervisorPanel() {
+  const show = document.getElementById('showSupervisorToggle')?.checked;
+  const panel = document.getElementById('supervisorMappingPanel');
+  if (panel) panel.style.display = show ? 'block' : 'none';
+  if (show) renderZoneSupervisorTable();
+}
+
+function toggleDriverMappingPanel() {
+  const show = document.getElementById('showDriverMappingToggle')?.checked;
+  const panel = document.getElementById('driverMappingPanel');
+  if (panel) panel.style.display = show ? 'block' : 'none';
+  if (show) renderDriverMappingTable();
+}
+
+function renderDriverMappingTable() {
+  const tbody = document.getElementById('driverMappingBody');
+  if (!tbody) return;
+  const entries = Object.entries(driverPhoneMapping);
+  if (entries.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="3" style="padding:10px;color:#999;text-align:center;">No drivers loaded. Click "Load Drivers from Geotab".</td></tr>';
+    return;
+  }
+  tbody.innerHTML = entries.map(([id, d]) => {
+    const rowBg = d.phone ? '' : 'background:#fffbea;';
+    return `
+    <tr style="${rowBg}">
+      <td style="padding:6px 10px;border:1px solid #e2e8f0;">${d.name}</td>
+      <td style="padding:6px 10px;border:1px solid #e2e8f0;color:#999;font-size:12px;">${id}</td>
+      <td style="padding:6px 10px;border:1px solid #e2e8f0;">
+        <input type="text" value="${d.phone || ''}" placeholder="+6421xxxxxxx"
+          style="width:100%;padding:4px 8px;border:1px solid ${d.phone ? '#cbd5e0' : '#f6ad55'};border-radius:4px;font-size:14px;"
+          onchange="driverPhoneMapping['${id}'].phone = this.value.trim(); rebuildUserPhoneMap(); renderDriverMappingTable();"
+        />
+      </td>
+    </tr>`;}).join('');
+}
+
+async function loadDriversFromGeotab() {
+  const btn = document.getElementById('loadDriversBtn');
+  const status = document.getElementById('driverMappingStatus');
+  try {
+    if (btn) btn.disabled = true;
+    if (btn) btn.textContent = 'Loading...';
+    if (status) status.innerHTML = '⏳ Fetching drivers from Geotab...';
+
+    const users = await callGeotabAPI('Get', { typeName: 'User', search: { isDriver: true }, resultsLimit: 1000 });
+
+    users.forEach(u => {
+      const id = u.id;
+      const name = u.name || `${u.firstName||''} ${u.lastName||''}`.trim() || id;
+      
+      if (!driverPhoneMapping[id]) {
+        driverPhoneMapping[id] = { name, phone: '' };
+      } else {
+        driverPhoneMapping[id].name = name;
+      }
+    });
+
+    renderDriverMappingTable();
+    rebuildUserPhoneMap();
+
+    if (status) status.innerHTML = `✅ ${users.length} drivers loaded from Geotab`;
+
+  } catch(e) {
+    if (status) status.innerHTML = `❌ Error: ${e.message}`;
+    console.error(e);
+  } finally {
+    if (btn) btn.disabled = false;
+    if (btn) btn.textContent = '🔄 Reload Drivers';
+  }
+}
+
+function exportDriverMappingCsv() {
+  const entries = Object.entries(driverPhoneMapping);
+  if (entries.length === 0) { alert('No drivers to export.'); return; }
+  const rows = [['DriverID','DriverName','MobileNumber']];
+  entries.forEach(([id, d]) => rows.push([id, d.name, d.phone || '']));
+  const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'driver_phone_mapping.csv';
+  a.click();
+}
+
+function importDriverMappingCsv(file) {
+  const status = document.getElementById('driverMappingStatus');
+  const reader = new FileReader();
+  reader.onload = e => {
+    const lines = e.target.result.split('\n').map(l => l.trim()).filter(Boolean);
+    let imported = 0;
+    lines.slice(1).forEach(line => {
+      const cols = line.split(',').map(c => c.replace(/^"|"$/g,'').replace(/""/g,'"').trim());
+      const [id, name, phone] = cols;
+      if (id && name) {
+        driverPhoneMapping[id] = { name, phone: phone || '' };
+        imported++;
+      }
+    });
+    renderDriverMappingTable();
+    rebuildUserPhoneMap();
+    if (status) status.innerHTML = `✓ Imported ${imported} drivers from CSV`;
+  };
+  reader.readAsText(file);
+}
+
+function renderZoneSupervisorTable() {
+  const tbody = document.getElementById('zoneSupervisorBody');
+  if (!tbody) return;
+  const statusEl = document.getElementById('supervisorMappingStatus');
+  if (statusEl) statusEl.innerHTML = `📱 Supervisor mapping ready — use Edit panel to update`;
+  tbody.innerHTML = PREDEFINED_ZONES.slice(0, 10).map(zone => `
+    <tr>
+      <td style="padding:6px 10px;border:1px solid #e2e8f0;font-size:15px;">${zone}</td>
+      <td style="padding:6px 10px;border:1px solid #e2e8f0;">
+        <input class="form-control zone-sup-name" data-zone="${zone}"
+          value="" style="padding:5px 8px;font-size:14px;width:100%;" placeholder="Supervisor name" />
+      </td>
+      <td style="padding:6px 10px;border:1px solid #e2e8f0;">
+        <input class="form-control zone-sup-phone" data-zone="${zone}"
+          value="" placeholder="+6421xxxxxxx"
+          style="padding:5px 8px;font-size:14px;width:100%;" />
+      </td>
+    </tr>`).join('');
+}
+
+function addToSmsLog(type, message, details = '') {
+  const timestamp = new Date().toLocaleString('en-NZ', { timeZone: 'Pacific/Auckland' });
+  const logEntry = { timestamp, type, message, details };
+  smsLog.unshift(logEntry);
+  if (smsLog.length > 50) smsLog.pop();
+  renderSmsLog();
+}
+
+function renderSmsLog() {
+  const logContainer = document.getElementById('smsLog');
+  if (!logContainer) return;
+  
+  let html = '';
+  smsLog.forEach(entry => {
+    const cssClass = entry.type === 'error' ? 'log-error' : 
+                     entry.type === 'sms' ? 'log-sms' : 
+                     entry.type === 'info' ? 'log-info' : 'log-success';
+    html += `
+      <div class="log-entry ${cssClass}">
+        <strong>${entry.timestamp}</strong> - ${entry.message}
+        ${entry.details ? `<br><small>${entry.details}</small>` : ''}
+      </div>
+    `;
+  });
+  
+  logContainer.innerHTML = html || '<em style="color: #999;">No SMS activity yet</em>';
+}
+
+async function sendETxtSMS(phoneNumber, message) {
+  const config = getEtxtConfig();
+  if (!config.workerUrl) throw new Error('Cloudflare Worker URL not set.');
+
+  let dest = String(phoneNumber).replace(/\s|-/g, '');
+  if (!dest.startsWith('+')) {
+    if (dest.startsWith('0')) dest = '+64' + dest.slice(1);
+    else dest = '+' + dest;
+  }
+
+  const body = JSON.stringify({
+    messages: [{ content: message, destination_number: dest, format: 'SMS' }]
+  });
+
+  const response = await fetch(`${config.workerUrl}/v1/messages`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+    body
+  });
+
+  const responseText = await response.text();
+  if (!response.ok) {
+    throw new Error(`eTXT error ${response.status}: ${responseText || response.statusText}`);
+  }
+
+  let result;
+  try { result = JSON.parse(responseText); } catch(e) { result = { raw: responseText }; }
+
+  const msgId = result?.messages?.[0]?.message_id || result?.message_id || result?.id || null;
+  console.log(`eTXT accepted: ${dest} | msg_id: ${msgId}`);
+  return { ...result, _confirmed_id: msgId, _destination: dest };
+}
+
+function isHeavyMachinery(vehicleName) {
+  const heavyKeywords = [
+    'excavator', 'loader', 'dozer', 'crane', 'grader',
+    'compactor', 'roller', 'backhoe', 'truck', 'tipper',
+    'dump', 'semi', 'tanker', 'bobcat', 'skid', 'machine'
+  ];
+  return heavyKeywords.some(kw => vehicleName.toLowerCase().includes(kw));
+}
+
+async function checkAndSendSmsAlerts() {
+  const enableSms = document.getElementById('enableSmsAlerts')?.checked;
+
+  if (!enableSms) {
+    addToSmsLog('info', 'SMS alerts are disabled');
+    return;
+  }
+
+  if (!mappedDvirData || mappedDvirData.length === 0) {
+    addToSmsLog('info', 'No DVIR data loaded. Please retrieve inspection data first.');
+    return;
+  }
+
+  addToSmsLog('info', '🔍 Starting SMS compliance check...');
+  document.getElementById('smsAlertStatus').style.display = 'block';
+
+  try {
+    const now = new Date();
+
+    const deviceMap = {};
+    mappedDvirData.forEach(row => {
+      const deviceId = row.deviceId;
+      const t = new Date(row.rawDateTime);
+      if (!deviceMap[deviceId] || t > deviceMap[deviceId].lastDvirTime) {
+        deviceMap[deviceId] = {
+          vehicleName:  row.vehicleName,
+          deviceId,
+          isHeavy:      isHeavyMachinery(row.vehicleName),
+          lastDvirTime: t,
+          lastDvirData: row,
+          driverPhone:  userPhoneMap[row.driverId] || null,
+          zones:        row.zones || []
+        };
+      }
+    });
+
+    const alerts = [];
+
+    const heavyPrimaryMins      = parseInt(document.getElementById('heavyPrimaryThreshold')?.value   || '5');
+    const heavySecondaryMins    = parseInt(document.getElementById('heavySecondaryThreshold')?.value || '120');
+    const lightDays             = parseInt(document.getElementById('lightPrimaryThreshold')?.value    || '5');
+
+    Object.values(deviceMap).forEach(device => {
+      const { vehicleName, isHeavy, lastDvirTime, lastDvirData, driverPhone, zones } = device;
+
+      const ignitionTime  = lastDvirData.ignitionTime;
+      const minsSinceIgn  = ignitionTime ? (now - new Date(ignitionTime)) / 60000 : null;
+
+      if (isHeavy && ignitionTime) {
+        if (minsSinceIgn >= heavyPrimaryMins && !lastDvirData.isInspectedByDriver) {
+          if (driverPhone) {
+            alerts.push({
+              type:        'heavy-primary',
+              label:       '🚛 Primary Alert',
+              vehicleName,
+              driverName:  lastDvirData.driverName,
+              minsSinceIgn: Math.round(minsSinceIgn),
+              recipients:  [{ label: 'Driver', phone: driverPhone }],
+              message:     `URGENT ${lastDvirData.driverName || ''}: ${vehicleName} has been in use for ${Math.round(minsSinceIgn)} minutes without a pre-start inspection. - UCCL Safety`
+            });
+          }
+        }
+
+        if (minsSinceIgn >= heavySecondaryMins && !lastDvirData.isInspectedByDriver) {
+          const opsPhone = (document.getElementById('opsManagerPhone')?.value || '').trim();
+          const secondaryRecipients = [];
+          if (opsPhone) secondaryRecipients.push({ label: `Ops Mgr`, phone: opsPhone });
+
+          alerts.push({
+            type:        'heavy-secondary',
+            label:       '🚛 Secondary Alert',
+            vehicleName,
+            driverName:  lastDvirData.driverName,
+            minsSinceIgn: Math.round(minsSinceIgn),
+            recipients:  secondaryRecipients,
+            message:     `SUPERVISOR ALERT: ${vehicleName} (Driver: ${lastDvirData.driverName}) has been operating for ${Math.round(minsSinceIgn)} minutes without a pre-start inspection. - UCCL Safety`
+          });
+        }
+      }
+
+      if (!isHeavy) {
+        const daysSince  = (now - lastDvirTime) / (1000 * 60 * 60 * 24);
+        if (daysSince >= lightDays) {
+          if (driverPhone) {
+            alerts.push({
+              type:        'light-primary',
+              label:       '🚗 Light Vehicle Alert',
+              vehicleName,
+              driverName:  lastDvirData.driverName,
+              daysSince:   Math.round(daysSince),
+              recipients:  [{ label: 'Driver', phone: driverPhone }],
+              message:     `Hi ${lastDvirData.driverName || 'there'}, ${vehicleName} has not had a pre-start inspection in ${Math.round(daysSince)} days. Please complete your DVIR check. - UCCL Safety`
+            });
+          }
+        }
+      }
+    });
+
+    if (alerts.length === 0) {
+      addToSmsLog('success', '✅ All vehicles compliant — no alerts needed');
+      document.getElementById('smsAlertsTable').innerHTML = '';
+      return;
+    }
+
+    addToSmsLog('warning', `⚠️ Found ${alerts.length} alert(s) to send`);
+    let sentCount = 0;
+
+    for (const alert of alerts) {
+      for (const recipient of alert.recipients) {
+        try {
+          await sendETxtSMS(recipient.phone, alert.message);
+          addToSmsLog('sms', `📱 SMS → ${recipient.label}: ${recipient.phone}`, `${alert.vehicleName} | ${alert.label}`);
+          sentCount++;
+        } catch (err) {
+          addToSmsLog('error', `❌ SMS failed to ${recipient.label} (${recipient.phone})`, err.message);
+        }
+      }
+    }
+
+    addToSmsLog('success', `✅ SMS check complete: ${sentCount} message(s) sent`);
+
+  } catch (error) {
+    console.error('SMS alert check error:', error);
+    addToSmsLog('error', '❌ SMS check failed', error.message);
+  }
+}
+
+// ============================================================================
+// POLLING FUNCTIONS
+// ============================================================================
+
+let pollTimer = null;
+let countdownTimer = null;
+let pollSecondsLeft = 0;
+
+function updateBanner() {
+  const enabled = document.getElementById('enableSmsAlerts')?.checked;
+  const banner  = document.getElementById('smsActiveBanner');
+  if (enabled && pollTimer && banner) {
+    banner.style.display = 'block';
+  } else if (banner) {
+    banner.style.display = 'none';
+  }
+}
+
+function startPolling() {
+  stopPolling(false);
+
+  const intervalMins = parseInt(document.getElementById('pollIntervalSelect')?.value || '10');
+  const intervalMs   = intervalMins * 60 * 1000;
+  pollSecondsLeft    = intervalMins * 60;
+  
+  const labelEl = document.getElementById('pollIntervalLabel');
+  if (labelEl) labelEl.textContent = intervalMins + ' min';
+
+  if (mappedDvirData.length > 0) {
+    checkAndSendSmsAlerts();
+  }
+
+  countdownTimer = setInterval(() => {
+    pollSecondsLeft--;
+    const mins = Math.floor(pollSecondsLeft / 60);
+    const secs = String(pollSecondsLeft % 60).padStart(2, '0');
+    const el = document.getElementById('pollCountdown');
+    if (el) el.textContent = `— next check in ${mins}:${secs}`;
+    if (pollSecondsLeft <= 0) pollSecondsLeft = intervalMins * 60;
+  }, 1000);
+
+  pollTimer = setInterval(async () => {
+    pollSecondsLeft = intervalMins * 60;
+    if (mappedDvirData.length > 0) {
+      addToSmsLog('info', `⏰ Auto-poll triggered (every ${intervalMins} min)`);
+      await checkAndSendSmsAlerts();
+    } else {
+      addToSmsLog('info', '⏰ Auto-poll skipped — no DVIR data loaded yet');
+    }
+  }, intervalMs);
+
+  updateBanner();
+  addToSmsLog('info', `▶️ Auto-poll started — checking every ${intervalMins} minutes`);
+}
+
+function stopPolling(log = true) {
+  if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
+  if (countdownTimer) { clearInterval(countdownTimer); countdownTimer = null; }
+  const el = document.getElementById('pollCountdown');
+  if (el) el.textContent = '';
+  updateBanner();
+  if (log) addToSmsLog('info', '⏹ Auto-poll stopped');
+}
+
+// ============================================================================
+// EVENT HANDLERS
+// ============================================================================
+
+document.getElementById('getDvir').onclick = async function(){
+  if(!window.geotab && !window.api){ 
+    showMessage('infoBanner','Geotab environment not detected. Please ensure this is running as a Geotab Add-In.','error'); 
+    return; 
+  }
+  
+  const fromDate = document.getElementById('fromDate').value;
+  const toDate = document.getElementById('toDate').value;
+  const fromTime = document.getElementById('fromTime').value || '00:00';
+  const toTime = document.getElementById('toTime').value || '23:59';
+  
+  if(!fromDate || !toDate){ showMessage('infoBanner','Please select both from and to dates','error'); return; }
+
+  const fromDateTime = `${fromDate}T${fromTime}:00.000Z`;
+  const toDateTime = `${toDate}T${toTime}:59.999Z`;
+
+  showMessage('infoBanner','Getting Asset Inspection logs...','warning');
+  document.getElementById('downloadCsv').disabled = true;
+
+  try{
+    if (geotabZones.length === 0) {
+      await fetchGeotabZones();
+    }
+    
+    await getIgnitionData(fromDate, toDate);
+    
+    const dvirLogs = await callGeotabAPI('Get', {
+      typeName:'DVIRLog',
+      search:{ fromDate: fromDateTime, toDate: toDateTime }
+    });
+
+    if(!dvirLogs || dvirLogs.length===0){
+      showMessage('infoBanner','No DVIR logs for the selected range','warning');
+      document.getElementById('dvirResult').innerHTML='';
+      return;
+    }
+
+    let defectMap = {};
+    dvirLogs.forEach(log => {
+      if (log.dVIRDefects && Array.isArray(log.dVIRDefects) && log.dVIRDefects.length > 0) {
+        defectMap[log.id] = log.dVIRDefects;
+      }
+    });
+
+    const driverIds = new Set(), deviceIds = new Set();
+    dvirLogs.forEach(l=>{ const did = extractId(l.driver); const vid = extractId(l.device); if(did) driverIds.add(did); if(vid) deviceIds.add(vid); });
+    const calls = [];
+    Array.from(driverIds).forEach(id=>calls.push({method:'Get', params:{typeName:'User', search:{id}}}));
+    Array.from(deviceIds).forEach(id=>calls.push({method:'Get', params:{typeName:'Device', search:{id}}}));
+    const lookup = await callGeotabAPI('ExecuteMultiCall', { calls });
+    const driverNames = {}; const deviceNames={}; let idx=0;
+    
+    Array.from(driverIds).forEach(id=>{ 
+      const r=lookup[idx++]; 
+      driverNames[id]=(r && r[0] && (r[0].name || `${r[0].firstName||''} ${r[0].lastName||''}`.trim())) || `Driver ${id}`;
+      if (!driverPhoneMapping[id]) {
+        const name = driverNames[id] || id;
+        driverPhoneMapping[id] = { name, phone: '' };
+      }
+    });
+    
+    Array.from(deviceIds).forEach(id=>{ const r=lookup[idx++]; deviceNames[id]=(r && r[0] && r[0].name) || `Device ${id}`; });
+    renderDriverMappingTable();
+    rebuildUserPhoneMap();
+
+    mappedDvirData = dvirLogs.map(l=>{
+      const driverId = extractId(l.driver);
+      const deviceId = extractId(l.device);
+      const loc = extractLocation(l.location);
+
+      let defectsString = '';
+      if (defectMap[l.id] && defectMap[l.id].length > 0) {
+        defectsString = JSON.stringify(defectMap[l.id]);
+      } else if (l.defects) {
+        if (typeof l.defects === 'string') {
+          defectsString = l.defects;
+        } else if (Array.isArray(l.defects)) {
+          defectsString = JSON.stringify(l.defects);
+        } else if (typeof l.defects === 'object') {
+          defectsString = JSON.stringify(l.defects);
+        }
+      }
+
+      return {
+        id:l.id,
+        dateTime:new Date(l.dateTime).toLocaleString('en-NZ', { timeZone: 'Pacific/Auckland' }),
+        rawDateTime:new Date(l.dateTime).getTime(),
+        driverName: (function() {
+          const geotabName = driverNames[driverId] || '';
+          const mapped = driverPhoneMapping[driverId];
+          if (mapped && mapped.name && mapped.name !== 'Sub Contractor') return mapped.name;
+          return geotabName || 'Unknown Driver';
+        })(),
+        driverId:driverId || '',
+        vehicleName:deviceNames[deviceId] || 'Unknown Vehicle',
+        deviceId:deviceId || '',
+        isSafeToOperate:l.isSafeToOperate,
+        isInspectedByDriver:l.isInspectedByDriver,
+        driverRemark:l.driverRemark || l.certifyRemark || '',
+        odometer:l.odometer || 0,
+        engineHours:l.engineHours || 0,
+        latitude:loc.latitude,
+        longitude:loc.longitude,
+        resolvedAddress:'',
+        zones:[],
+        defects:defectsString,
+        isOverdue: false,
+        ignitionTime: null,
+        timeToInspection: null
+      };
+    });
+
+    const totalBeforeFilter = mappedDvirData.length;
+    mappedDvirData = filterNotNecessaryDefects(mappedDvirData);
+    const removedCount = totalBeforeFilter - mappedDvirData.length;
+    if (removedCount > 0) {
+      console.log(`Filtered out ${removedCount} inspections with [NotNecessary] repair status.`);
+    }
+
+    mappedDvirData = checkOverdueInspections(mappedDvirData);
+
+    currentSortColumn = 'dateTime';
+    currentSortDirection = 'desc';
+
+    const selectedZone = document.getElementById('zoneFilter').value;
+    const filteredByZone = filterDataByZone(mappedDvirData, selectedZone);
+    const filteredData = filterDataByStatusAndType(filteredByZone);
+    const sortedData = sortData(filteredData, currentSortColumn, currentSortDirection);
+
+    renderTable(sortedData);
+
+    const locationsToResolve = mappedDvirData.filter(r => r.latitude != null && r.longitude != null);
+
+    if (locationsToResolve.length > 0) {
+      showMessage('infoBanner', `🌍 Resolving ${locationsToResolve.length} addresses...`, 'info');
+      await resolveAllAddresses(mappedDvirData);
+      
+      const filteredByZoneAfterResolve = filterDataByZone(mappedDvirData, selectedZone);
+      const filteredDataAfterResolve = filterDataByStatusAndType(filteredByZoneAfterResolve);
+      const sortedDataAfterResolve = sortData(filteredDataAfterResolve, currentSortColumn, currentSortDirection);
+      renderTable(sortedDataAfterResolve);
+      renderZoneStatistics(mappedDvirData);
+      
+      showMessage('infoBanner', '✅ Address resolution complete!', 'success');
+    } else {
+      renderZoneStatistics(mappedDvirData);
+      showMessage('infoBanner', '✅ DVIR loaded successfully!', 'success');
+    }
+    
+    document.getElementById('downloadCsv').disabled = false;
+    document.getElementById('checkSmsAlerts').disabled = false;
+    
+  }catch(e){
+    showMessage('infoBanner', `Failed: ${e.message}`, 'error');
+    console.error(e);
+  }
+};
+
+document.getElementById('downloadCsv').onclick = function(){
+  if(!mappedDvirData || mappedDvirData.length===0){ showMessage('infoBanner','No DVIR data to export','warning'); return; }
+  
+  const headers = ['DateTime','Driver_Name','Vehicle_Name','Safe_To_Operate','Driver_Inspected','Has_Defects','Defect_Count','Defect_Details','Address','Zones','Odometer_km','Engine_Hours','Ignition_Time','Time_To_Inspection_Min','Is_Overdue','Hubbo_KMs'];
+  let csv = headers.map(h=>`"${h}"`).join(',') + '\n';
+  mappedDvirData.forEach(r=>{
+    let hasDefects='NO', defectCount='0', defectDetails='';
+    if (r.defects && r.defects !== '[]' && r.defects !== '') {
+      try{
+        const d = JSON.parse(r.defects);
+        if(Array.isArray(d)&&d.length>0){
+          hasDefects='YES';
+          defectCount=String(d.length);
+          defectDetails = d.map(def => {
+            let defectName = '';
+            if (def.defectRemarks && Array.isArray(def.defectRemarks) && def.defectRemarks.length > 0) {
+              defectName = def.defectRemarks[0].remark || def.defectRemarks[0].Remark || '';
+            }
+            if (!defectName && def.defect && typeof def.defect === 'object') {
+              defectName = def.defect.name || def.defect.Name || '';
+            }
+            if (!defectName && def.part && typeof def.part === 'object') {
+              defectName = def.part.name || def.part.Name || '';
+            }
+            if (!defectName) {
+              defectName = def.name || def.Name || def.remark || def.Remark || 'Defect detected';
+            }
+            const repairStatus = def.repairStatus || def.RepairStatus || '';
+            return `${defectName}${repairStatus ? ' [' + repairStatus + ']' : ''}`;
+          }).join('; ');
+        }
+      }
+      catch(e){
+        if(r.defects.length>10){ hasDefects='YES'; defectCount='Unknown'; defectDetails='Parse error'; }
+      }
+    }
+    const zonesText = (r.zones||[]).join(' | ') || 'No Zone';
+    const row = [
+      r.dateTime, r.driverName, r.vehicleName,
+      r.isSafeToOperate===true?'SAFE':r.isSafeToOperate===false?'UNSAFE':'No',
+      r.isInspectedByDriver===true?'YES':'NO',
+      hasDefects, defectCount, defectDetails,
+      r.resolvedAddress || `${r.latitude || ''}, ${r.longitude || ''}`,
+      zonesText,
+      r.odometer ? Math.round(r.odometer/1000*100)/100 : '',
+      r.engineHours ? Math.round(r.engineHours/3600*100)/100 : '',
+      r.ignitionTime ? new Date(r.ignitionTime).toLocaleString('en-NZ', { timeZone: 'Pacific/Auckland' }) : '',
+      r.timeToInspection || '',
+      r.isOverdue ? 'YES' : 'NO',
+      r.driverRemark || ''
+    ].map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',');
+    csv += row + '\n';
+  });
+  const ts = new Date().toISOString().slice(0,19).replace(/[:.]/g,'-');
+  const filename = `Geotab_DVIR_With_Addresses_${ts}.csv`;
+  const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+  const a = document.createElement('a');
+  const url = URL.createObjectURL(blob);
+  a.href = url; a.download = filename; a.style.display='none';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  showMessage('infoBanner', `📊 CSV "${filename}" downloaded`, 'success');
+};
+
+document.getElementById('zoneFilter').addEventListener('change', function() {
+  if (!mappedDvirData.length) return;
+  const selectedZone = this.value;
+  const filteredByZone = filterDataByZone(mappedDvirData, selectedZone);
+  const filteredData = filterDataByStatusAndType(filteredByZone);
+  const sortedData = currentSortColumn ? sortData(filteredData, currentSortColumn, currentSortDirection) : filteredData;
+  renderTable(sortedData);
+});
+
+document.getElementById('testSmsBtn').addEventListener('click', async function() {
+  const phoneNumber = document.getElementById('testSmsNumber').value.trim();
+  const resultSpan  = document.getElementById('smsTestResult');
+  const btn = this;
+
+  if (!phoneNumber) {
+    if (resultSpan) resultSpan.innerHTML = '<span style="color:#e53e3e;">❌ Please enter a phone number</span>';
+    return;
+  }
+  let normalised = phoneNumber;
+  if (/^02\d/.test(normalised)) normalised = '+64' + normalised.slice(1);
+  if (!normalised.startsWith('+64')) {
+    if (resultSpan) resultSpan.innerHTML = '<span style="color:#e53e3e;">❌ Number must be a NZ mobile: 02x... or +642x...</span>';
+    return;
+  }
+
+  btn.disabled = true;
+  if (resultSpan) resultSpan.innerHTML = '<span style="color:#4299e1;">📨 Sending via eTXT...</span>';
+
+  try {
+    await sendETxtSMS(normalised, 'Test from UCCL Pre-Start Monitor. eTXT SMS is working correctly. - UCCL Safety');
+    if (resultSpan) resultSpan.innerHTML = `<span style="color:#38a169;">✅ Test SMS sent to ${normalised}</span>`;
+    addToSmsLog('sms', '📱 Test SMS sent', `To: ${normalised}`);
+  } catch (error) {
+    if (resultSpan) resultSpan.innerHTML = `<span style="color:#e53e3e;">❌ ${error.message}</span>`;
+    addToSmsLog('error', '❌ Test SMS failed', error.message);
+  } finally {
+    btn.disabled = false;
+  }
+});
+
+document.getElementById('checkSmsAlerts').addEventListener('click', async function() {
+  await checkAndSendSmsAlerts();
+});
+
+document.getElementById('enableSmsAlerts').addEventListener('change', function() {
+  if (this.checked) {
+    startPolling();
+  } else {
+    stopPolling();
+  }
+});
+
+document.getElementById('pollIntervalSelect')?.addEventListener('change', function() {
+  if (document.getElementById('enableSmsAlerts').checked) {
+    addToSmsLog('info', `🔄 Poll interval changed to ${this.value} min — restarting`);
+    startPolling();
+  }
+  const labelEl = document.getElementById('pollIntervalLabel');
+  if (labelEl) labelEl.textContent = this.value + ' min';
+});
+
+// Wire up driver mapping buttons
+document.addEventListener('DOMContentLoaded', () => {
+  const loadBtn   = document.getElementById('loadDriversBtn');
+  const exportBtn = document.getElementById('exportDriverCsvBtn');
+  const importBtn = document.getElementById('importDriverCsvBtn');
+  const fileInput = document.getElementById('driverCsvInput');
+
+  if (loadBtn)   loadBtn.addEventListener('click', loadDriversFromGeotab);
+  if (exportBtn) exportBtn.addEventListener('click', exportDriverMappingCsv);
+  if (importBtn) importBtn.addEventListener('click', () => fileInput && fileInput.click());
+  if (fileInput) fileInput.addEventListener('change', e => {
+    if (e.target.files[0]) importDriverMappingCsv(e.target.files[0]);
+    e.target.value = '';
+  });
+
+  renderDriverMappingTable();
+  updateZoneDropdown();
+  fetchGeotabZones();
+  renderSmsLog();
+  renderZoneSupervisorTable();
+});
+
+// Make functions globally available
+window.sortTable = sortTable;
+window.stopPolling = stopPolling;
+window.driverPhoneMapping = driverPhoneMapping;
+window.rebuildUserPhoneMap = rebuildUserPhoneMap;
+window.renderDriverMappingTable = renderDriverMappingTable;
+window.toggleFixedRecipientsPanel = toggleFixedRecipientsPanel;
+window.toggleSupervisorPanel = toggleSupervisorPanel;
+window.toggleDriverMappingPanel = toggleDriverMappingPanel;
+</script>
+</body>
+</html>

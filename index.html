@@ -1,4 +1,39 @@
-<!DOCTYPE html>
+// Wait for Geotab API to be available
+function waitForGeotabAPI(retries = 20) {
+  return new Promise((resolve, reject) => {
+    function check() {
+      if (window.geotab && typeof window.geotab.call === 'function') {
+        console.log('Geotab API found via window.geotab');
+        resolve(window.geotab);
+      } else if (window.api && typeof window.api.call === 'function') {
+        console.log('Geotab API found via window.api');
+        resolve(window.api);
+      } else if (typeof geotab !== 'undefined' && geotab && typeof geotab.call === 'function') {
+        console.log('Geotab API found via geotab');
+        resolve(geotab);
+      } else if (retries > 0) {
+        console.log(`Waiting for Geotab API... (${retries} retries left)`);
+        setTimeout(() => check(), 100);
+      } else {
+        reject(new Error('Geotab API not available after waiting'));
+      }
+    }
+    check();
+  });
+}
+
+// Modified callGeotabAPI that waits
+let geotabApiReady = null;
+async function callGeotabAPI(method, params = {}) {
+  if (!geotabApiReady) {
+    geotabApiReady = waitForGeotabAPI();
+  }
+  const api = await geotabApiReady;
+  
+  return new Promise((resolve, reject) => {
+    api.call(method, params, resolve, reject);
+  });
+}<!DOCTYPE html>
 <html>
 <head>
   <meta charset="UTF-8" />
